@@ -134,7 +134,7 @@ public class VolumeManagerModule extends ReactContextBaseJavaModule implements A
   }
 
   @ReactMethod
-  public void enable(final Boolean enabled) {
+  public void enable(boolean enabled, boolean async) {
     // no op
   }
 
