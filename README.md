@@ -33,12 +33,7 @@ yarn add react-native-volume-manager
 
 For React Native >= 0.60, manual linking is not required with Autolinking.
 
-> Note: This library is incompatible with Expo Go. To use it, you can install a [custom development client](https://docs.expo.dev/develop/development-builds/create-a-build/) as recommended in 2023.
-
-## Simulators / Emulators
-
-- iOS: The AVAudioSession API offers control over audio behaviors and settings on iOS devices. However, some hardware-specific features of AVAudioSession, such as volume control and audio route selection, don't have equivalent functionalities on macOS, which the simulator runs on. As a result, this package operates only on a real device, with events not being triggered on the simulator.
-- Android: It runs on both a real device (API level 21+) and the emulator (API level 33+).
+> Note: This library is incompatible with Expo Go. To use it, you can install a custom development client as recommended in 2022.
 
 ## Usage
 
