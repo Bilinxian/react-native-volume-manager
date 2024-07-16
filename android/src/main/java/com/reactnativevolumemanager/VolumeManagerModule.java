@@ -14,7 +14,9 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
+
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -28,9 +30,7 @@ import com.facebook.react.module.annotations.ReactModule;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
 @ReactModule(name = VolumeManagerModule.NAME)
-public class VolumeManagerModule
-  extends ReactContextBaseJavaModule
-  implements ActivityEventListener, LifecycleEventListener {
+public class VolumeManagerModule extends ReactContextBaseJavaModule implements ActivityEventListener, LifecycleEventListener {
 
   public static final String NAME = "VolumeManager";
   private final String TAG = VolumeManagerModule.class.getSimpleName();
@@ -56,18 +56,16 @@ public class VolumeManagerModule
     mContext = reactContext;
     reactContext.addLifecycleEventListener(this);
     am =
-      (AudioManager) mContext
-        .getApplicationContext()
-        .getSystemService(Context.AUDIO_SERVICE);
+        (AudioManager) mContext
+            .getApplicationContext()
+            .getSystemService(Context.AUDIO_SERVICE);
     volumeBR = new VolumeBroadcastReceiver();
     this.category = null;
   }
 
   private void registerVolumeReceiver() {
     if (!volumeBR.isRegistered()) {
-      IntentFilter filter = new IntentFilter(
-        "android.media.VOLUME_CHANGED_ACTION"
-      );
+      IntentFilter filter = new IntentFilter("android.media.VOLUME_CHANGED_ACTION");
       mContext.registerReceiver(volumeBR, filter);
       volumeBR.setRegistered(true);
     }
@@ -86,8 +84,11 @@ public class VolumeManagerModule
 
   private void setupKeyListener() {
     runOnUiThread(() -> {
-      View rootView =
-        ((ViewGroup) mContext.getCurrentActivity().getWindow().getDecorView());
+      Activity activity = mContext.getCurrentActivity();
+      if (activity == null) {
+        return;
+      }
+      View rootView = ((ViewGroup) activity.getWindow().getDecorView());
       rootView.setFocusableInTouchMode(true);
       rootView.requestFocus();
 
@@ -100,16 +101,16 @@ public class VolumeManagerModule
         switch (event.getKeyCode()) {
           case KeyEvent.KEYCODE_VOLUME_UP:
             am.adjustStreamVolume(
-              AudioManager.STREAM_MUSIC,
-              AudioManager.ADJUST_RAISE,
-              AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
+                AudioManager.STREAM_MUSIC,
+                AudioManager.ADJUST_RAISE,
+                AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
             );
             return true;
           case KeyEvent.KEYCODE_VOLUME_DOWN:
             am.adjustStreamVolume(
-              AudioManager.STREAM_MUSIC,
-              AudioManager.ADJUST_LOWER,
-              AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
+                AudioManager.STREAM_MUSIC,
+                AudioManager.ADJUST_LOWER,
+                AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE
             );
             return true;
           default:
@@ -149,13 +150,8 @@ public class VolumeManagerModule
   }
 
   private boolean hasDndAccess() {
-    NotificationManager nm = (NotificationManager) mContext.getSystemService(
-      Context.NOTIFICATION_SERVICE
-    );
-    return (
-      (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) ||
-      nm.isNotificationPolicyAccessGranted()
-    );
+    NotificationManager nm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+    return ((Build.VERSION.SDK_INT < Build.VERSION_CODES.M) || nm.isNotificationPolicyAccessGranted());
   }
 
   @ReactMethod
@@ -166,21 +162,13 @@ public class VolumeManagerModule
   @ReactMethod
   public void requestDndAccess(Promise promise) {
     if (!hasDndAccess() && mContext.hasCurrentActivity()) {
-      Intent intent = null;
-      if (
-        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M
-      ) {
-        intent =
-          new Intent(
-            android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
-          );
+      if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+        Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        mContext.startActivity(intent);
+        promise.resolve(true);
+        return;
       }
-      assert intent != null;
-      intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-      Context context = mContext.getCurrentActivity().getApplicationContext();
-      context.startActivity(intent);
-      promise.resolve(true);
     }
 
     promise.resolve(false);
@@ -214,26 +202,16 @@ public class VolumeManagerModule
     }
     try {
       am.setStreamVolume(
-        volType,
-        (int) (val * am.getStreamMaxVolume(volType)),
-        flags
+          volType,
+          (int) (val * am.getStreamMaxVolume(volType)),
+          flags
       );
     } catch (SecurityException e) {
       if (val == 0) {
-        Log.w(
-          TAG,
-          "setVolume(0) failed. See https://github.com/c19354837/react-native-system-setting/issues/48"
-        );
-        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(
-          Context.NOTIFICATION_SERVICE
-        );
-        if (
-          Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-          !notificationManager.isNotificationPolicyAccessGranted()
-        ) {
-          Intent intent = new Intent(
-            android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
-          );
+        Log.w(TAG, "setVolume(0) failed. See https://github.com/c19354837/react-native-system-setting/issues/48");
+        NotificationManager notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !notificationManager.isNotificationPolicyAccessGranted()) {
+          Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
           mContext.startActivity(intent);
         }
       }
@@ -251,10 +229,7 @@ public class VolumeManagerModule
     result.putDouble(VOL_RING, getNormalizationVolume(VOL_RING));
     result.putDouble(VOL_MUSIC, getNormalizationVolume(VOL_MUSIC));
     result.putDouble(VOL_ALARM, getNormalizationVolume(VOL_ALARM));
-    result.putDouble(
-      VOL_NOTIFICATION,
-      getNormalizationVolume(VOL_NOTIFICATION)
-    );
+    result.putDouble(VOL_NOTIFICATION, getNormalizationVolume(VOL_NOTIFICATION));
     promise.resolve(result);
   }
 
@@ -293,20 +268,19 @@ public class VolumeManagerModule
   private void cleanupKeyListener() {
     runOnUiThread(() -> {
       if (!hardwareButtonListenerRegistered) return;
-      View rootView =
-        ((ViewGroup) mContext.getCurrentActivity().getWindow().getDecorView());
-      rootView.setOnKeyListener(null);
+      Activity activity = mContext.getCurrentActivity();
+      if (activity != null) {
+        View rootView = ((ViewGroup) activity.getWindow().getDecorView());
+        rootView.setOnKeyListener(null);
+      }
+
       hardwareButtonListenerRegistered = false;
     });
   }
 
   @Override
-  public void onActivityResult(
-    Activity activity,
-    int requestCode,
-    int resultCode,
-    Intent data
-  ) {}
+  public void onActivityResult(Activity activity, int requestCode, int resultCode, Intent data) {
+  }
 
   @Override
   public void onNewIntent(Intent intent) {
@@ -344,7 +318,7 @@ public class VolumeManagerModule
 
     @Override
     public void onReceive(Context context, Intent intent) {
-      if (intent.getAction().equals("android.media.VOLUME_CHANGED_ACTION")) {
+      if ("android.media.VOLUME_CHANGED_ACTION".equals(intent.getAction())) {
         WritableMap para = Arguments.createMap();
         para.putDouble("volume", getNormalizationVolume(VOL_MUSIC));
         para.putDouble(VOL_VOICE_CALL, getNormalizationVolume(VOL_VOICE_CALL));
@@ -352,14 +326,11 @@ public class VolumeManagerModule
         para.putDouble(VOL_RING, getNormalizationVolume(VOL_RING));
         para.putDouble(VOL_MUSIC, getNormalizationVolume(VOL_MUSIC));
         para.putDouble(VOL_ALARM, getNormalizationVolume(VOL_ALARM));
-        para.putDouble(
-          VOL_NOTIFICATION,
-          getNormalizationVolume(VOL_NOTIFICATION)
-        );
+        para.putDouble(VOL_NOTIFICATION, getNormalizationVolume(VOL_NOTIFICATION));
         try {
           mContext
-            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-            .emit("RNVMEventVolume", para);
+              .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+              .emit("RNVMEventVolume", para);
         } catch (RuntimeException e) {
           // Possible to interact with volume before JS bundle execution is finished.
           // This is here to avoid app crashing.

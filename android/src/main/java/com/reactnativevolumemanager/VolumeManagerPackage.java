@@ -14,9 +14,7 @@ public class VolumeManagerPackage implements ReactPackage {
 
   @NonNull
   @Override
-  public List<NativeModule> createNativeModules(
-    @NonNull ReactApplicationContext reactContext
-  ) {
+  public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
     List<NativeModule> modules = new ArrayList<>();
     modules.add(new VolumeManagerModule(reactContext));
     modules.add(new VolumeManagerSilentListenerModule(reactContext));
@@ -25,9 +23,7 @@ public class VolumeManagerPackage implements ReactPackage {
 
   @NonNull
   @Override
-  public List<ViewManager> createViewManagers(
-    @NonNull ReactApplicationContext reactContext
-  ) {
+  public List<ViewManager> createViewManagers(@NonNull ReactApplicationContext reactContext) {
     return Collections.emptyList();
   }
 }
