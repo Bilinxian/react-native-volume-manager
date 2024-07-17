@@ -96,7 +96,7 @@ export interface VolumeManagerSetVolumeConfig {
  */
 export interface VolumeResult {
   // Both iOS and Android (defaults to type music for android)
-  volume: number;
+  volume: string;
   // Android only
   alarm?: number;
   // Android only

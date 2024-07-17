@@ -223,7 +223,7 @@ public class VolumeManagerModule extends ReactContextBaseJavaModule implements A
   @ReactMethod
   public void getVolume(Promise promise) {
     WritableMap result = Arguments.createMap();
-    result.putDouble("volume", getNormalizationVolume(VOL_MUSIC));
+    result.putString("volume", String.valueOf(getNormalizationVolume(VOL_MUSIC)));
     result.putDouble(VOL_VOICE_CALL, getNormalizationVolume(VOL_VOICE_CALL));
     result.putDouble(VOL_SYSTEM, getNormalizationVolume(VOL_SYSTEM));
     result.putDouble(VOL_RING, getNormalizationVolume(VOL_RING));
@@ -320,7 +320,7 @@ public class VolumeManagerModule extends ReactContextBaseJavaModule implements A
     public void onReceive(Context context, Intent intent) {
       if ("android.media.VOLUME_CHANGED_ACTION".equals(intent.getAction())) {
         WritableMap para = Arguments.createMap();
-        para.putDouble("volume", getNormalizationVolume(VOL_MUSIC));
+        para.putString("volume", String.valueOf(getNormalizationVolume(VOL_MUSIC)));
         para.putDouble(VOL_VOICE_CALL, getNormalizationVolume(VOL_VOICE_CALL));
         para.putDouble(VOL_SYSTEM, getNormalizationVolume(VOL_SYSTEM));
         para.putDouble(VOL_RING, getNormalizationVolume(VOL_RING));

@@ -144,11 +144,11 @@ RCT_EXPORT_MODULE(VolumeManager)
                        context:(void *)context {
   if (object == [AVAudioSession sharedInstance] &&
       [keyPath isEqualToString:@"outputVolume"]) {
-    float newValue = [change[@"new"] floatValue];
+    NSString *newValue = change[@"new"];
     if (hasListeners) {
       [self
           sendEventWithName:@"RNVMEventVolume"
-                       body:@{@"volume" : [NSNumber numberWithFloat:newValue]}];
+                       body:@{@"volume" : newValue}];
     }
   }
 }
@@ -184,9 +184,8 @@ RCT_EXPORT_METHOD(getVolume
   dispatch_async(dispatch_get_main_queue(), ^{
     __strong typeof(weakSelf) strongSelf = weakSelf;
     if (strongSelf) {
-      NSNumber *volumeNumber = [NSNumber
-          numberWithFloat:[strongSelf->customVolumeView.volumeSlider value]];
-      NSDictionary *volumeDictionary = @{@"volume" : volumeNumber};
+      NSString *volume = [NSString stringWithFormat:@"%g",[strongSelf->customVolumeView.volumeSlider value]];
+      NSDictionary *volumeDictionary = @{@"volume" : volume};
       resolve(volumeDictionary);
     }
   });
