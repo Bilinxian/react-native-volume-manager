@@ -54,12 +54,12 @@ public class VolumeManagerModule extends ReactContextBaseJavaModule implements A
   public VolumeManagerModule(ReactApplicationContext reactContext) {
     super(reactContext);
     mContext = reactContext;
-    reactContext.addLifecycleEventListener(this);
     am =
         (AudioManager) mContext
             .getApplicationContext()
             .getSystemService(Context.AUDIO_SERVICE);
     volumeBR = new VolumeBroadcastReceiver();
+    reactContext.addLifecycleEventListener(this);
     this.category = null;
   }
 
